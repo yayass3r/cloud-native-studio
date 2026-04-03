@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import { Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Cloud-Native Studio | بيئة تطوير سحابية",
+  description: "منصة تطوير متكاملة تعمل داخل المتصفح باستخدام WebContainers - تشبه Replit في قوتها",
+  keywords: ["Cloud IDE", "WebContainers", "Next.js", "TypeScript", "AI"],
+  authors: [{ name: "Cloud-Native Studio" }],
+  icons: {
+    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ar" dir="ltr" suppressHydrationWarning>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body
+        className={`${geistMono.variable} antialiased bg-[#1e1e1e] text-foreground`}
+        style={{ fontFamily: "'Tajawal', sans-serif" }}
+      >
+        {children}
+        <Toaster />
+      </body>
+    </html>
+  );
+}
