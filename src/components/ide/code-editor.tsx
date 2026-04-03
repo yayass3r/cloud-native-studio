@@ -19,46 +19,29 @@ function getLanguage(filePath: string | null): string {
   if (!filePath) return 'plaintext';
   const ext = filePath.split('.').pop()?.toLowerCase();
   const langMap: Record<string, string> = {
-    js: 'javascript',
-    jsx: 'javascript',
-    ts: 'typescript',
-    tsx: 'typescript',
-    html: 'html',
-    css: 'css',
-    scss: 'scss',
-    json: 'json',
-    md: 'markdown',
-    yaml: 'yaml',
-    yml: 'yaml',
-    py: 'python',
-    rb: 'ruby',
-    go: 'go',
-    rs: 'rust',
-    java: 'java',
-    cpp: 'cpp',
-    c: 'c',
-    sh: 'shell',
-    bash: 'shell',
-    sql: 'sql',
-    xml: 'xml',
-    svg: 'xml',
+    js: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
+    html: 'html', css: 'css', scss: 'scss', json: 'json', md: 'markdown',
+    yaml: 'yaml', yml: 'yaml', py: 'python', rb: 'ruby', go: 'go',
+    rs: 'rust', java: 'java', cpp: 'cpp', c: 'c', sh: 'shell', bash: 'shell',
+    sql: 'sql', xml: 'xml', svg: 'xml',
   };
   return langMap[ext || ''] || 'plaintext';
 }
 
-export function CodeEditor() {
+export function CodeEditor({ isMobile = false }: { isMobile?: boolean }) {
   const { activeFilePath, fileContents } = useIDEStore();
-
   const currentContent = activeFilePath ? fileContents[activeFilePath] || '' : '';
   const language = getLanguage(activeFilePath);
 
   if (!activeFilePath) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-[#1e1e1e]">
-        <div className="text-center text-muted-foreground">
+        <div className="text-center text-muted-foreground px-6">
           <FileIcon />
-          <p className="text-lg font-medium mt-4">اختر ملفًا للتعديل</p>
-          <p className="text-sm mt-1">اختر ملفًا من مستعرض الملفات على اليسار</p>
+          <p className="text-base font-medium mt-4">{isMobile ? 'اختر ملفًا' : 'اختر ملفًا للتعديل'}</p>
+          <p className="text-sm mt-1 text-muted-foreground/70">
+            {isMobile ? 'انتقل إلى تبويب "الملفات" واختر ملفًا' : 'اختر ملفًا من مستعرض الملفات على اليسار'}
+          </p>
         </div>
       </div>
     );
@@ -73,24 +56,39 @@ export function CodeEditor() {
         value={currentContent}
         path={activeFilePath}
         options={{
-          minimap: { enabled: true, scale: 2 },
+          minimap: { enabled: !isMobile },
           fontSize: 14,
           fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-          lineNumbers: 'on',
+          lineNumbers: isMobile ? 'off' : 'on',
+          glyphMargin: false,
+          folding: !isMobile,
+          lineDecorationsWidth: isMobile ? 8 : 10,
+          lineNumbersMinChars: isMobile ? 0 : 3,
+          renderLineHighlight: isMobile ? 'none' : 'all',
+          overviewRulerLanes: 0,
+          hideCursorInOverviewRuler: true,
+          overviewRulerBorder: false,
+          scrollbar: {
+            verticalScrollbarSize: isMobile ? 6 : 10,
+            horizontalScrollbarSize: isMobile ? 6 : 10,
+          },
           roundedSelection: true,
           scrollBeyondLastLine: false,
           automaticLayout: true,
           tabSize: 2,
           wordWrap: 'on',
-          padding: { top: 12 },
+          padding: { top: isMobile ? 8 : 12 },
           smoothScrolling: true,
           cursorBlinking: 'smooth',
           cursorSmoothCaretAnimation: 'on',
           bracketPairColorization: { enabled: true },
-          guides: {
-            bracketPairs: true,
-            indentation: true,
-          },
+          guides: { bracketPairs: true, indentation: !isMobile },
+          quickSuggestions: !isMobile,
+          suggestOnTriggerCharacters: !isMobile,
+          parameterHints: { enabled: !isMobile },
+          contextmenu: true,
+          readOnly: false,
+          domReadOnly: false,
         }}
       />
     </div>
@@ -99,7 +97,7 @@ export function CodeEditor() {
 
 function FileIcon() {
   return (
-    <svg className="w-16 h-16 mx-auto text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className="w-14 h-14 mx-auto text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   );

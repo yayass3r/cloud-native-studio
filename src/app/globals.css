@@ -89,8 +89,8 @@
 
 /* IDE Custom Scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -98,12 +98,12 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Override selection color for dark theme */
@@ -115,4 +115,61 @@
 /* Monaco editor overrides */
 .monaco-editor .suggest-widget {
   border-radius: 6px !important;
+}
+
+/* Safe Area Utilities */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevent body scroll on iOS */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Touch target improvements */
+@media (max-width: 767px) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent text selection on UI elements */
+  button, nav, header {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Make xterm scrollbar touchable */
+  .xterm-viewport::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  /* Monaco editor mobile overrides */
+  .monaco-editor .scroll-decoration {
+    display: none !important;
+  }
+
+  .monaco-editor .minimap {
+    display: none !important;
+  }
+
+  /* Better input zoom prevention on iOS */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .safe-top {
+    padding-top: 0px;
+  }
+  .safe-bottom {
+    padding-bottom: 0px;
+  }
 }

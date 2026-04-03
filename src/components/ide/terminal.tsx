@@ -39,18 +39,21 @@ export function TerminalPanel() {
         brightWhite: '#f0f6fc',
       },
       fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-      fontSize: 13,
-      lineHeight: 1.5,
+      fontSize: 12,
+      lineHeight: 1.4,
       cursorBlink: true,
       cursorStyle: 'block',
       scrollback: 5000,
+      scrollbackSensitivity: 60,
+      allowProposedApi: true,
     });
 
     const fitAddon = new FitAddon();
     xterm.loadAddon(fitAddon);
     xterm.open(terminalRef.current);
 
-    setTimeout(() => fitAddon.fit(), 100);
+    // Fit with slight delay
+    const fitTimeout = setTimeout(() => fitAddon.fit(), 150);
 
     xtermRef.current = xterm;
 
@@ -60,6 +63,7 @@ export function TerminalPanel() {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(fitTimeout);
       window.removeEventListener('resize', handleResize);
       xterm.dispose();
       xtermRef.current = null;
@@ -73,7 +77,7 @@ export function TerminalPanel() {
   }, [terminalOutput]);
 
   return (
-    <div className="h-full w-full bg-[#0d1117] p-1">
+    <div className="h-full w-full bg-[#0d1117]">
       <div ref={terminalRef} className="h-full w-full" />
     </div>
   );

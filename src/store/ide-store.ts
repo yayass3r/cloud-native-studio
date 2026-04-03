@@ -8,6 +8,8 @@ export interface FileNode {
   content?: string;
 }
 
+export type MobileTab = 'editor' | 'files' | 'preview' | 'terminal' | 'ai';
+
 interface IDEState {
   // File system
   files: FileNode[];
@@ -28,6 +30,9 @@ interface IDEState {
   isWebContainerReady: boolean;
   isBooting: boolean;
 
+  // Mobile Navigation
+  mobileActiveTab: MobileTab;
+
   // Actions
   setActiveFile: (path: string) => void;
   setFileContent: (path: string, content: string) => void;
@@ -39,6 +44,7 @@ interface IDEState {
   setWebContainerReady: (ready: boolean) => void;
   setBooting: (booting: boolean) => void;
   setFiles: (files: FileNode[]) => void;
+  setMobileActiveTab: (tab: MobileTab) => void;
 }
 
 export const useIDEStore = create<IDEState>((set) => ({
@@ -53,6 +59,7 @@ export const useIDEStore = create<IDEState>((set) => ({
   isAIChatOpen: true,
   isWebContainerReady: false,
   isBooting: false,
+  mobileActiveTab: 'editor',
 
   setActiveFile: (path) => set({ activeFilePath: path }),
   setFileContent: (path, content) => set((state) => ({
@@ -70,4 +77,5 @@ export const useIDEStore = create<IDEState>((set) => ({
   setWebContainerReady: (ready) => set({ isWebContainerReady: ready }),
   setBooting: (booting) => set({ isBooting: booting }),
   setFiles: (files) => set({ files }),
+  setMobileActiveTab: (tab) => set({ mobileActiveTab: tab }),
 }));
