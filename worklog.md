@@ -61,3 +61,20 @@ Created/updated 10 files to implement a fully responsive IDE that works on both 
 10. **UPDATED `layout.tsx`** - Added Next.js `Viewport` export for mobile meta tags (device-width, initial-scale=1, maximum-scale=1, user-scalable=false, viewport-fit=cover, theme-color=#181818). Added apple-mobile-web-app-capable and apple-mobile-web-app-status-bar-style meta tags for PWA support.
 
 All files pass ESLint with 0 errors (1 non-blocking warning about Google Fonts link in layout.tsx head). Dev server compiles successfully.
+
+---
+Task ID: 3
+Agent: main
+Task: Integrate PromoBox component into IDE layout
+
+Work Log:
+- Created `src/components/ide/promo-box.tsx` — styled PromoBox dialog using shadcn/ui Dialog component
+- PromoBox features: structured promo sections with icons, RTL layout, gradient copy button with success state, fallback clipboard API for older browsers
+- Updated `src/components/ide/ide-layout.tsx` — added Info button (ℹ️) to both DesktopHeader and MobileHeader
+- Clicking the Info button opens the PromoBox as a modal dialog
+- Desktop: Info button in top-right header area next to status badges
+- Mobile: Info button in top-right with 36px touch target for easy tapping
+
+Stage Summary:
+- PromoBox is accessible from both desktop and mobile via header info button
+- 0 lint errors, dev server compiles successfully

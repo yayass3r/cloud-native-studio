@@ -7,16 +7,19 @@ import { LivePreview } from './live-preview';
 import { AIChat } from './ai-chat';
 import { CommandBar } from './command-bar';
 import { MobileNav } from './mobile-nav';
+import { PromoBox } from './promo-box';
 import { useIDEStore } from '@/store/ide-store';
 import { useWebContainer } from '@/hooks/use-webcontainer';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import {
   Cloud,
   Loader2,
   CheckCircle2,
   Code2,
+  Info,
 } from 'lucide-react';
 
 function ResizeHandle({ direction = 'horizontal' }: { direction?: 'horizontal' | 'vertical' }) {
@@ -39,7 +42,6 @@ function ResizeHandle({ direction = 'horizontal' }: { direction?: 'horizontal' |
   );
 }
 
-// Mobile single panel wrapper with animation
 function MobilePanel({ children, tabId }: { children: React.ReactNode; tabId: string }) {
   const { mobileActiveTab } = useIDEStore();
   return (
@@ -62,6 +64,7 @@ function MobilePanel({ children, tabId }: { children: React.ReactNode; tabId: st
 
 function MobileHeader() {
   const { isWebContainerReady, isBooting, mobileActiveTab, activeFilePath } = useIDEStore();
+  const [promoOpen, setPromoOpen] = useState(false);
 
   const tabTitles: Record<string, string> = {
     editor: activeFilePath || 'المحرر',
@@ -72,68 +75,89 @@ function MobileHeader() {
   };
 
   return (
-    <header className="flex items-center justify-between px-3 py-2 bg-[#181818] border-b border-border/50 shrink-0 safe-top" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0px))' }}>
-      <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-          <Cloud className="w-4 h-4 text-white" />
-        </div>
-        <div className="flex flex-col">
-          <h1 className="text-sm font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
-            Cloud-Native
-          </h1>
-          <p className="text-[10px] text-muted-foreground leading-tight">{tabTitles[mobileActiveTab]}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {isBooting && (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-[11px]">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            <span>تحميل</span>
+    <>
+      <header className="flex items-center justify-between px-3 py-2 bg-[#181818] border-b border-border/50 shrink-0 safe-top" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top, 0px))' }}>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 via-purple-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <Cloud className="w-4 h-4 text-white" />
           </div>
-        )}
-        {isWebContainerReady && (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 text-green-400 text-[11px]">
-            <CheckCircle2 className="w-3 h-3" />
-            <span>جاهز</span>
+          <div className="flex flex-col">
+            <h1 className="text-sm font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
+              Cloud-Native
+            </h1>
+            <p className="text-[10px] text-muted-foreground leading-tight">{tabTitles[mobileActiveTab]}</p>
           </div>
-        )}
-      </div>
-    </header>
+        </div>
+        <div className="flex items-center gap-2">
+          {isBooting && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 text-[11px]">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>تحميل</span>
+            </div>
+          )}
+          {isWebContainerReady && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10 text-green-400 text-[11px]">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>جاهز</span>
+            </div>
+          )}
+          <button
+            onClick={() => setPromoOpen(true)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 active:bg-accent/30 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+            title="عن المشروع"
+          >
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+      <PromoBox open={promoOpen} onOpenChange={setPromoOpen} />
+    </>
   );
 }
 
 function DesktopHeader() {
   const { isWebContainerReady, isBooting } = useIDEStore();
+  const [promoOpen, setPromoOpen] = useState(false);
 
   return (
-    <header className="flex items-center justify-between px-4 py-1.5 bg-[#181818] border-b border-border/50 shrink-0">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-violet-600 via-purple-600 to-cyan-600 flex items-center justify-center">
-            <Cloud className="w-4 h-4 text-white" />
+    <>
+      <header className="flex items-center justify-between px-4 py-1.5 bg-[#181818] border-b border-border/50 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-violet-600 via-purple-600 to-cyan-600 flex items-center justify-center">
+              <Cloud className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="text-sm font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+              Cloud-Native Studio
+            </h1>
           </div>
-          <h1 className="text-sm font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-            Cloud-Native Studio
-          </h1>
+          <div className="w-px h-5 bg-border/50" />
+          <span className="text-xs text-muted-foreground hidden lg:inline" dir="rtl">بيئة تطوير متكاملة في المتصفح</span>
         </div>
-        <div className="w-px h-5 bg-border/50" />
-        <span className="text-xs text-muted-foreground hidden lg:inline" dir="rtl">بيئة تطوير متكاملة في المتصفح</span>
-      </div>
-      <div className="flex items-center gap-3">
-        {isBooting && (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 text-xs">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            <span>جاري التحميل</span>
-          </div>
-        )}
-        {isWebContainerReady && (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-xs">
-            <CheckCircle2 className="w-3 h-3" />
-            <span>جاهز</span>
-          </div>
-        )}
-      </div>
-    </header>
+        <div className="flex items-center gap-2">
+          {isBooting && (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-400 text-xs">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>جاري التحميل</span>
+            </div>
+          )}
+          {isWebContainerReady && (
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-xs">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>جاهز</span>
+            </div>
+          )}
+          <button
+            onClick={() => setPromoOpen(true)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            title="عن المشروع"
+          >
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+      <PromoBox open={promoOpen} onOpenChange={setPromoOpen} />
+    </>
   );
 }
 
@@ -193,7 +217,6 @@ function MobileLayout() {
       {/* Editor Tab */}
       <MobilePanel tabId="editor">
         <div className="h-full flex flex-col bg-[#1e1e1e]">
-          {/* File Tab Bar */}
           {activeFilePath && (
             <div className="flex items-center bg-[#252526] border-b border-border/50 shrink-0 px-2">
               <div className="flex items-center gap-1.5 px-2 py-1.5 bg-[#1e1e1e] border-b-2 border-violet-500 text-xs rounded-t-sm">
