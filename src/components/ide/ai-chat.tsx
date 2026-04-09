@@ -60,8 +60,6 @@ export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
           </div>
           <button
             onClick={() => {
-              useIDEStore.getState().addChatMessage = useIDEStore.getState().addChatMessage;
-              // Clear chat by resetting to welcome message only
               useIDEStore.setState({
                 chatMessages: [
                   { role: 'assistant', content: 'مرحبًا! أنا مساعدك الذكي في Cloud-Native Studio. كيف يمكنني مساعدتك اليوم؟ 🚀' }
