@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   keywords: ["Cloud IDE", "WebContainers", "Next.js", "TypeScript", "AI"],
   authors: [{ name: "Cloud-Native Studio" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/logo.png",
   },
 };
 
