@@ -5,7 +5,7 @@ import { Send, X, Bot, User, Sparkles } from 'lucide-react';
 import { useState, useRef, useEffect, FormEvent } from 'react';
 
 export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
-  const { chatMessages, addChatMessage, isAIChatOpen, toggleAIChat } = useIDEStore();
+  const { chatMessages, addChatMessage } = useIDEStore();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

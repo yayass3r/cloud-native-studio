@@ -20,6 +20,8 @@ import {
   CheckCircle2,
   Code2,
   Info,
+  PanelRightClose,
+  PanelRightOpen,
 } from 'lucide-react';
 
 function ResizeHandle({ direction = 'horizontal' }: { direction?: 'horizontal' | 'vertical' }) {
@@ -116,7 +118,7 @@ function MobileHeader() {
 }
 
 function DesktopHeader() {
-  const { isWebContainerReady, isBooting } = useIDEStore();
+  const { isWebContainerReady, isBooting, isAIChatOpen, toggleAIChat } = useIDEStore();
   const [promoOpen, setPromoOpen] = useState(false);
 
   return (
@@ -132,7 +134,7 @@ function DesktopHeader() {
             </h1>
           </div>
           <div className="w-px h-5 bg-border/50" />
-          <span className="text-xs text-muted-foreground hidden lg:inline" dir="rtl">بيئة تطوير متكاملة في المتصفح</span>
+          <span className="text-xs text-muted-foreground hidden lg:inline">بيئة تطوير متكاملة في المتصفح</span>
         </div>
         <div className="flex items-center gap-2">
           {isBooting && (
@@ -148,6 +150,13 @@ function DesktopHeader() {
             </div>
           )}
           <button
+            onClick={toggleAIChat}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            title={isAIChatOpen ? 'إخفاء المساعد الذكي' : 'عرض المساعد الذكي'}
+          >
+            {isAIChatOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRightOpen className="w-4 h-4" />}
+          </button>
+          <button
             onClick={() => setPromoOpen(true)}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
             title="عن المشروع"
@@ -162,7 +171,7 @@ function DesktopHeader() {
 }
 
 function DesktopLayout() {
-  const { isWebContainerReady, activeFilePath } = useIDEStore();
+  const { isWebContainerReady, activeFilePath, isAIChatOpen } = useIDEStore();
 
   return (
     <>
@@ -179,7 +188,7 @@ function DesktopLayout() {
             <div className="h-full flex flex-col bg-[#1e1e1e]">
               <div className="flex items-center bg-[#252526] border-b border-border/50 shrink-0">
                 {activeFilePath && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e1e1e] border-r border-border/50 text-sm">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e1e1e] border-l border-border/50 text-sm">
                     <Code2 className="w-3.5 h-3.5 text-muted-foreground" />
                     <span className="truncate max-w-[150px]">{activeFilePath}</span>
                   </div>
@@ -199,9 +208,32 @@ function DesktopLayout() {
             <LivePreview />
           </ResizablePanel>
         </ResizablePanelGroup>
-        <div className="w-[320px] shrink-0">
-          <AIChat />
-        </div>
+        {/* AI Chat sidebar - collapsible */}
+        <AnimatePresence mode="wait">
+          {isAIChatOpen && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 320, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="h-full overflow-hidden border-l border-border/50"
+            >
+              <div className="w-[320px] h-full">
+                <AIChat />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* Floating AI button when sidebar is closed */}
+        {!isAIChatOpen && (
+          <button
+            onClick={() => useIDEStore.getState().setIsAIChatOpen(true)}
+            className="fixed bottom-4 left-4 z-50 p-3 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            title="فتح المساعد الذكي"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+          </button>
+        )}
       </div>
     </>
   );

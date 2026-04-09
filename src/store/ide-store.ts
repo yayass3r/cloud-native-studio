@@ -44,6 +44,7 @@ interface IDEState {
   setPreviewUrl: (url: string | null) => void;
   addChatMessage: (message: { role: 'user' | 'assistant'; content: string }) => void;
   toggleAIChat: () => void;
+  setIsAIChatOpen: (open: boolean) => void;
   setWebContainerReady: (ready: boolean) => void;
   setBooting: (booting: boolean) => void;
   setFiles: (files: FileNode[]) => void;
@@ -82,10 +83,17 @@ export const useIDEStore = create<IDEState>((set) => ({
   }),
   clearTerminal: () => set({ terminalOutput: [] }),
   setPreviewUrl: (url) => set({ previewUrl: url }),
-  addChatMessage: (message) => set((state) => ({
-    chatMessages: [...state.chatMessages, message]
-  })),
+  addChatMessage: (message) => set((state) => {
+    // Cap chat messages at 100 to prevent memory leak
+    const msgs = [...state.chatMessages, message];
+    if (msgs.length > 100) {
+      // Keep first message (welcome) + last 99
+      return { chatMessages: [msgs[0], ...msgs.slice(-99)] };
+    }
+    return { chatMessages: msgs };
+  }),
   toggleAIChat: () => set((state) => ({ isAIChatOpen: !state.isAIChatOpen })),
+  setIsAIChatOpen: (open: boolean) => set({ isAIChatOpen: open }),
   setWebContainerReady: (ready) => set({ isWebContainerReady: ready }),
   setBooting: (booting) => set({ isBooting: booting }),
   setFiles: (files) => set({ files }),
