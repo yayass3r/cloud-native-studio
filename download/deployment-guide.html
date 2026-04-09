@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud-Native Studio - دليل النشر الشامل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --secondary: #06b6d4;
+      --accent: #8b5cf6;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-alt: #162032;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-bright: #f8fafc;
+      --border: #334155;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #0d1117;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 11pt;
+      line-height: 1.8;
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 20mm 22mm;
+      page-break-after: always;
+      position: relative;
+      background: var(--bg);
+    }
+
+    .page:last-child { page-break-after: auto; }
+
+    /* Cover Page */
+    .cover {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 297mm;
+      padding: 30mm 25mm;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cover::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid var(--primary-light);
+      border-radius: 50px;
+      font-size: 9pt;
+      color: var(--primary-light);
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-title {
+      font-size: 36pt;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-subtitle {
+      font-size: 14pt;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-features {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 40px;
+    }
+
+    .cover-feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 9.5pt;
+      color: var(--text);
+    }
+
+    .cover-feature .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .cover-footer {
+      position: relative;
+      z-index: 1;
+      color: var(--text-muted);
+      font-size: 9pt;
+      margin-top: 20px;
+    }
+
+    /* Content pages */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .section-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: white;
+      border-radius: 10px;
+      font-size: 14pt;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 18pt;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .subsection-title {
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin-top: 22px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    .step {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      font-size: 11pt;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .step-content { flex: 1; }
+
+    .step-content strong { color: var(--text-bright); }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 10px 0 14px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 9pt;
+      line-height: 1.6;
+      color: #c9d1d9;
+      overflow-x: auto;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .code-comment { color: #6e7681; }
+    .code-keyword { color: #ff7b72; }
+    .code-string { color: #a5d6ff; }
+    .code-var { color: #ffa657; }
+
+    .info-box {
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin: 14px 0;
+      font-size: 10pt;
+    }
+
+    .info-box.info {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      color: #67e8f9;
+    }
+
+    .info-box.warning {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fcd34d;
+    }
+
+    .info-box.danger {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+    }
+
+    .info-box.success {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #86efac;
+    }
+
+    .table-wrapper {
+      margin: 14px 0;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5pt;
+    }
+
+    th {
+      background: var(--primary);
+      color: white;
+      padding: 10px 14px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+
+    tr:nth-child(even) td { background: var(--bg-card-alt); }
+
+    .env-var {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 8.5pt;
+      color: var(--secondary);
+      direction: ltr;
+    }
+
+    ul, ol {
+      margin: 8px 0 14px 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .check-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .check-list li::before {
+      content: '✓ ';
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .warn-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .warn-list li::before {
+      content: '⚠ ';
+      color: var(--warning);
+    }
+
+    .page-footer {
+      position: absolute;
+      bottom: 12mm;
+      left: 22mm;
+      right: 22mm;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+
+    .highlight { color: var(--secondary); font-weight: 600; }
+    .bold { font-weight: 700; color: var(--text-bright); }
+
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-box {
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 9pt;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .flow-arrow { color: var(--primary-light); font-size: 14pt; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 14px 0;
+    }
+
+    .card {
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .card-title {
+      font-size: 11pt;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== صفحة الغلاف ===== -->
+<div class="page cover">
+  <div class="cover-badge">
+    <span>●</span> دليل النشر والإعداد الشامل
+  </div>
+  <div class="cover-title">Cloud-Native Studio</div>
+  <div class="cover-subtitle">بيئة تطوير متكاملة في المتصفح — دليل النشر الكامل</div>
+
+  <div class="cover-features">
+    <div class="cover-feature">
+      <span class="dot" style="background: var(--success);"></span>
+      قاعدة بيانات مجانية
+    </div>
+    <div class="cover-feature">
+      <span class="dot" style="background: var(--secondary);"></span>
+      استضافة مجانية + SSL
+    </div>
+    <div class="cover-feature">
+      <span class="dot" style="background: var(--warning);"></span>
+      نطاق مجاني
+    </div>
+    <div class="cover-feature">
+      <span class="dot" style="background: var(--primary-light);"></span>
+      نشر تلقائي
+    </div>
+  </div>
+
+  <div style="position: relative; z-index: 1; text-align: center; max-width: 420px;">
+    <p style="color: var(--text-muted); font-size: 10pt;">
+      دليل تفصيلي خطوة بخطوة لنشر Cloud-Native Studio باستخدام
+      Supabase وVercel ونطاق مجاني — مع جميع المتطلبات والإعدادات
+    </p>
+  </div>
+
+  <div class="cover-footer">
+    <span>الإصدار 1.0 — أبريل 2026</span>
+    <span>github.com/yayass3r/cloud-native-studio</span>
+  </div>
+</div>
+
+<!-- ===== صفحة المتطلبات ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">المتطلبات الأساسية</div>
+  </div>
+
+  <div class="subsection-title">1.1 حسابات مطلوبة (مجانية)</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>الخدمة</th>
+          <th>الرابط</th>
+          <th>الاستخدام</th>
+          <th>التكلفة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="bold">GitHub</span></td>
+          <td>github.com</td>
+          <td>استضافة الكود المصدري</td>
+          <td>مجاني</td>
+        </tr>
+        <tr>
+          <td><span class="bold">Vercel</span></td>
+          <td>vercel.com</td>
+          <td>استضافة الموقع + SSL + نطاق فرعي</td>
+          <td>مجاني</td>
+        </tr>
+        <tr>
+          <td><span class="bold">Supabase</span></td>
+          <td>supabase.com</td>
+          <td>قاعدة بيانات PostgreSQL</td>
+          <td>مجاني</td>
+        </tr>
+        <tr>
+          <td><span class="bold">eu.org</span> (اختياري)</td>
+          <td>nic.eu.org</td>
+          <td>نطاق مجاني من الدرجة الأولى</td>
+          <td>مجاني</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subsection-title">1.2 متطلبات المتصفح (حرجة)</div>
+
+  <div class="info-box danger">
+    <strong>تنبيه مهم:</strong> WebContainers — وهو المحرك الأساسي للمشروع — يعمل فقط عبر HTTPS مع رؤوس COOP/COEP. بدون هذه المتطلبات لن تعمل بيئة التطوير داخل المتصفح.
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>المتصفح</th>
+          <th>الإصدار الأدنى</th>
+          <th>الحالة</th>
+          <th>ملاحظة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Chrome / Edge</td>
+          <td>89+</td>
+          <td style="color: var(--success);">يعمل بالكامل</td>
+          <td>الأفضل للتجربة</td>
+        </tr>
+        <tr>
+          <td>Firefox</td>
+          <td>108+</td>
+          <td style="color: var(--warning);">يعمل بقيود</td>
+          <td>قد تكون بعض الميزات محدودة</td>
+        </tr>
+        <tr>
+          <td>Safari</td>
+          <td>16.4+</td>
+          <td style="color: var(--danger);">غير مدعوم</td>
+          <td>SharedArrayBuffer غير متوفر</td>
+        </tr>
+        <tr>
+          <td>متصفح الهاتف</td>
+          <td>—</td>
+          <td style="color: var(--danger);">غير مدعوم</td>
+          <td>WebContainers لا يعمل على الموبايل</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box warning">
+    <strong>عن واجهة الهاتف:</strong> المشروع يحتوي على واجهة هاتف متكاملة (تصميم متجاوب + شريط تنقل سفلي) لكن بيئة WebContainers لا تعمل على متصفحات الهاتف. واجهة الهاتف ستعمل بصريًا لكن التطوير بالكامل يحتاج سطح مكتب.
+  </div>
+
+  <div class="subsection-title">1.3 البنية التقنية للنشر</div>
+
+  <div class="flow-diagram">
+    <div class="flow-box">المستخدم (Chrome)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box" style="border-color: var(--secondary);">Vercel (HTTPS + COOP/COEP)</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box" style="border-color: var(--primary);">Next.js App</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box">WebContainers (في المتصفح)</div>
+  </div>
+  <div class="flow-diagram" style="margin-top: -6px;">
+    <div class="flow-box">Next.js API Routes</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-box" style="border-color: var(--success);">Supabase PostgreSQL</div>
+  </div>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 2</span>
+  </div>
+</div>
+
+<!-- ===== صفحة Supabase ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">إعداد Supabase (قاعدة البيانات)</div>
+  </div>
+
+  <p>Supabase يوفر قاعدة بيانات PostgreSQL مجانية بسعة <span class="highlight">500MB</span> مع <span class="highlight">50,000 صف شهريًا</span> — أكثر من كافٍ لمشروع Cloud-Native Studio. تتضمن الخطة المجانية أيضًا مصادقة المستخدمين والتخزين.</p>
+
+  <div class="subsection-title">2.1 إنشاء المشروع</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <strong>انتقل إلى supabase.com</strong> وأنشئ حسابًا مجانيًا باستخدام GitHub أو البريد الإلكتروني. بعد تسجيل الدخول، انقر على <strong>"New Project"</strong>.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <strong>املأ بيانات المشروع:</strong> اختر اسمًا (مثل <span dir="ltr">cloud-native-studio</span>)، اختر كلمة مرور قوية لقاعدة البيانات، واختر أقرب منطقة لك (مثل <span dir="ltr">eu-west-1</span> أو <span dir="ltr">us-east-1</span>).
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <strong>انتظر إنشاء المشروع</strong> (يستغرق حوالي دقيقتين). بعدها ستصل إلى لوحة التحكم.
+    </div>
+  </div>
+
+  <div class="subsection-title">2.2 إنشاء الجداول</div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <strong>انتقل إلى SQL Editor</strong> من القائمة الجانبية. الصق SQL التالي وانقر <strong>"Run"</strong> لإنشاء جميع الجداول:
+    </div>
+  </div>
+
+  <div class="code-block">-- إنشاء جدول المستخدمين
+CREATE TABLE users (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  name TEXT,
+  avatar TEXT,
+  provider TEXT DEFAULT 'credentials',
+  provider_id TEXT UNIQUE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- إنشاء جدول المشاريع
+CREATE TABLE projects (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  is_public BOOLEAN DEFAULT false,
+  language TEXT DEFAULT 'javascript',
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- إنشاء جدول ملفات المشروع
+CREATE TABLE project_files (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  path TEXT NOT NULL,
+  content TEXT DEFAULT '',
+  project_id TEXT REFERENCES projects(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(project_id, path)
+);
+
+-- إنشاء جدول النسخ الاحتياطية
+CREATE TABLE snapshots (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  project_id TEXT REFERENCES projects(id) ON DELETE CASCADE,
+  data TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- إنشاء جدول سجل المحادثات
+CREATE TABLE chat_histories (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  project_id TEXT,
+  role TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- إنشاء الفهارس
+CREATE INDEX idx_chat_user ON chat_histories(user_id);
+CREATE INDEX idx_chat_date ON chat_histories(created_at);
+
+-- تفعيل RLS (Row Level Security)
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_files ENABLE ROW LEVEL SECURITY;
+ALTER TABLE snapshots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_histories ENABLE ROW LEVEL SECURITY;</div>
+
+  <div class="info-box info">
+    <strong>ما هو RLS؟</strong> Row Level Security يحمي بياناتك. مع تفعيله، لا يمكن لأي مستخدم الوصول إلى بيانات مستخدم آخر. يمكنك لاحقًا إضافة سياسات (Policies) لتحديد من يستطيع قراءة وكتابة كل جدول.
+  </div>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 3</span>
+  </div>
+</div>
+
+<!-- ===== صفحة Supabase المتغيرات ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">إعداد متغيرات البيئة</div>
+  </div>
+
+  <div class="subsection-title">3.1 الحصول على مفاتيح Supabase</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <strong>من لوحة تحكم Supabase</strong>، انتقل إلى <strong>Settings → API</strong>. ستجد ثلاث قيم تحتاجها:
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>المتغير</th>
+          <th>الموقع في Supabase</th>
+          <th>الوصف</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="env-var">NEXT_PUBLIC_SUPABASE_URL</span></td>
+          <td>Project URL</td>
+          <td>رابط المشروع (مثل https://xxx.supabase.co)</td>
+        </tr>
+        <tr>
+          <td><span class="env-var">NEXT_PUBLIC_SUPABASE_ANON_KEY</span></td>
+          <td>anon public</td>
+          <td>مفتاح عام — آمن للاستخدام في الواجهة</td>
+        </tr>
+        <tr>
+          <td><span class="env-var">SUPABASE_SERVICE_ROLE_KEY</span></td>
+          <td>service_role secret</td>
+          <td>مفتاح خادم — صلاحيات كاملة، لا تشاركه أبدًا</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <strong>لرابط قاعدة البيانات (DATABASE_URL):</strong> انتقل إلى <strong>Settings → Database → Connection string</strong> واختر <strong>"URI"</strong>. استبدل <span dir="ltr">[YOUR-PASSWORD]</span> بكلمة المرور التي اخترتها عند إنشاء المشروع.
+    </div>
+  </div>
+
+  <div class="subsection-title">3.2 إعداد متغيرات Vercel</div>
+
+  <p>بعد ربط المشروع مع Vercel (سنفعل ذلك في الخطوة التالية)، انتقل إلى:</p>
+
+  <div class="step">
+    <div class="step-num">→</div>
+    <div class="step-content">
+      <strong>Vercel Dashboard → Project → Settings → Environment Variables</strong> وأضف المتغيرات التالية واحدة تلو الأخرى:
+    </div>
+  </div>
+
+  <div class="code-block">NEXT_PUBLIC_SUPABASE_URL = https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIs...
+SUPABASE_SERVICE_ROLE_KEY = eyJhbGciOiJIUzI1NiIs...
+DATABASE_URL = postgresql://postgres:[PASS]@db.xxx.supabase.co:5432/postgres
+NEXTAUTH_SECRET = [any-random-string-32chars]
+NEXTAUTH_URL = https://your-domain.vercel.app</div>
+
+  <div class="info-box warning">
+    <strong>ملاحظة عن NEXTAUTH_SECRET:</strong> أنشئ سلسلة عشوائية بتشغيل هذا الأمر في الطرفية:
+    <span dir="ltr" style="display:block; font-family: monospace; margin-top:6px;">openssl rand -base64 32</span>
+  </div>
+
+  <div class="subsection-title">3.3 API Routes المتاحة</div>
+
+  <p>بعد إعداد Supabase، ستتوفر لديك API routes جاهزة:</p>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>الطريقة</th>
+          <th>المسار</th>
+          <th>الوظيفة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>GET</td><td dir="ltr">/api/projects</td><td>عرض جميع المشاريع</td></tr>
+        <tr><td>POST</td><td dir="ltr">/api/projects</td><td>إنشاء مشروع جديد</td></tr>
+        <tr><td>GET</td><td dir="ltr">/api/projects/[id]</td><td>عرض مشروع + ملفاته</td></tr>
+        <tr><td>PATCH</td><td dir="ltr">/api/projects/[id]</td><td>تحديث بيانات المشروع</td></tr>
+        <tr><td>DELETE</td><td dir="ltr">/api/projects/[id]</td><td>حذف المشروع</td></tr>
+        <tr><td>GET</td><td dir="ltr">/api/projects/[id]/files</td><td>عرض ملفات المشروع</td></tr>
+        <tr><td>POST</td><td dir="ltr">/api/projects/[id]/files</td><td>حفظ/تحديث ملف</td></tr>
+        <tr><td>GET</td><td dir="ltr">/api/projects/[id]/snapshots</td><td>عرض النسخ الاحتياطية</td></tr>
+        <tr><td>POST</td><td dir="ltr">/api/projects/[id]/snapshots</td><td>إنشاء نسخة احتياطية</td></tr>
+        <tr><td>POST</td><td dir="ltr">/api/ai-chat</td><td>المساعد الذكي (AI)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 4</span>
+  </div>
+</div>
+
+<!-- ===== صفحة Vercel ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">إعداد Vercel (الاستضافة)</div>
+  </div>
+
+  <p>Vercel يوفر استضافة مجانية لـ Next.js مع <span class="highlight">SSL تلقائي</span> و<span class="highlight">CDN عالمي</span>. الخطة المجانية تتضمن: نطاق فرعي (<span dir="ltr">.vercel.app</span>)، 100GB نقل بيانات شهريًا، ونشر تلقائي من GitHub.</p>
+
+  <div class="subsection-title">4.1 ربط المشروع</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <strong>سجل الدخول إلى vercel.com</strong> باستخدام حساب GitHub الخاص بك. هذا يسهل ربط المستودع مباشرة.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <strong>انقر "Add New → Project"</strong> ثم اختر مستودع <span dir="ltr">yayass3r/cloud-native-studio</span> من القائمة. إذا لم يظهر، انقر <strong>"Adjust GitHub App Permissions"</strong> وامنح الوصول.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <strong>إعدادات البناء:</strong> اترك الإعدادات الافتراضية كما هي. Vercel يكتشف تلقائيًا أن المشروع Next.js:
+    </div>
+  </div>
+
+  <div class="code-block">Framework Preset:  Next.js
+Build Command:    npm run build
+Output Directory:  (تلقائي)
+Install Command:   npm install</div>
+
+  <div class="info-box success">
+    <strong>رؤوس COOP/COEP:</strong> ملف <span dir="ltr">vercel.json</span> الموجود في المشروع يتضمن إعدادات الرؤوس المطلوبة لـ WebContainers. Vercel سيطبقها تلقائيًا عند النشر.
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <strong>انقر "Deploy"</strong> وانتظر. يستغرق البناء حوالي 1-2 دقيقة. بعد الانتهاء ستحصل على رابط مثل:
+      <span dir="ltr" style="display:block; font-family: monospace; background: var(--code-bg); padding: 8px; border-radius: 6px; margin-top: 8px; color: var(--success);">https://cloud-native-studio.vercel.app</span>
+    </div>
+  </div>
+
+  <div class="subsection-title">4.2 إضافة متغيرات البيئة على Vercel</div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <strong>بعد النشر الأول:</strong> انتقل إلى <strong>Settings → Environment Variables</strong> وأضف جميع المتغيرات من القسم 3.2 أعلاه. أضفها لبيئات <strong>Production, Preview, Development</strong> جميعها.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-content">
+      <strong>أعد النشر:</strong> بعد إضافة المتغيرات، انتقل إلى <strong>Deployments</strong> وانقر على النقاط الثلاث (...) بجانب آخر نشر ثم اختر <strong>"Redeploy"</strong>.
+    </div>
+  </div>
+
+  <div class="info-box info">
+    <strong>النشر التلقائي:</strong> بعد الربط الأول، كل دفع (push) إلى فرع <span dir="ltr">main</span> في GitHub سيُنشِئ نشرًا جديدًا تلقائيًا على Vercel. لا حاجة لنشر يدوي بعد الآن.
+  </div>
+
+  <div class="subsection-title">4.3 حدود الخطة المجانية</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>الميزة</th><th>الحد المجاني</th><th>ملاحظة</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>عرض النطاق</td><td>100 GB/شهر</td><td>يكفي لآلاف الزيارات</td></tr>
+        <tr><td>ب Builds</td><td>6000/شهر</td><td>بناء تلقائي مع كل push</td></tr>
+        <tr><td>الوظائف (Serverless)</td><td>100GB-hours</td><td>API Routes تعمل كوظائف</td></tr>
+        <tr><td>مدة الوظيفة</td><td>10 ثوانٍ</td><td>كافٍ لمعظم العمليات</td></tr>
+        <tr><td>SSL</td><td>تلقائي</td><td>مهم جدًا لـ WebContainers</td></tr>
+        <tr><td>النطاق الفرعي</td><td>.vercel.app</td><td>مجاني تلقائيًا</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 5</span>
+  </div>
+</div>
+
+<!-- ===== صفحة النطاق ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">إعداد النطاق (Domain)</div>
+  </div>
+
+  <p>لديك عدة خيارات مجانية للنطاق. Vercel يوفر نطاقًا فرعيًا مجانيًا تلقائيًا، ويمكنك أيضًا الحصول على نطاق مجاني من الدرجة الأولى.</p>
+
+  <div class="two-col">
+    <div class="card" style="border-color: var(--success);">
+      <div class="card-title" style="color: var(--success);">الخيار 1: النطاق الفرعي (الأسهل)</div>
+      <p style="font-size: 9.5pt; color: var(--text-muted);">Vercel يمنحك تلقائيًا نطاقًا مثل:</p>
+      <div class="code-block" style="font-size: 9pt;">cloud-native-studio.vercel.app</div>
+      <p style="font-size: 9pt;"><strong style="color: var(--success);">المميزات:</strong> يعمل فورًا، SSL تلقائي، لا حاجة لأي إعداد إضافي.</p>
+    </div>
+    <div class="card" style="border-color: var(--secondary);">
+      <div class="card-title" style="color: var(--secondary);">الخيار 2: eu.org (نطاق مجاني حقيقي)</div>
+      <p style="font-size: 9.5pt; color: var(--text-muted);">نطاق من الدرجة الأولى مجاني تمامًا مثل:</p>
+      <div class="code-block" style="font-size: 9pt;">cloud-native-studio.eu.org</div>
+      <p style="font-size: 9pt;"><strong style="color: var(--secondary);">المميزات:</strong> نطاق حقيقي مجاني، يتجدد تلقائيًا. <strong>العيوب:</strong> الموافقة تستغرق أسابيع.</p>
+    </div>
+  </div>
+
+  <div class="subsection-title">5.1 ربط نطاق مخصص مع Vercel</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <strong>بعد الحصول على النطاق</strong> (سواء من eu.org أو أي جهة أخرى)، انتقل إلى <strong>Vercel → Settings → Domains</strong>.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <strong>أضف النطاق</strong> واتبع التعليمات لإضافة سجلات DNS. عادةً تحتاج إلى إضافة <strong>CNAME</strong> يشير إلى <span dir="ltr">cname.vercel-dns.com</span>.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <strong>انتظر انتشار DNS</strong> (من دقائق إلى 48 ساعة). Vercel سيُصدِّر شهادة SSL تلقائيًا لنطاقك.
+    </div>
+  </div>
+
+  <div class="subsection-title">5.2 خطوات الحصول على نطاق eu.org</div>
+
+  <div class="info-box warning">
+    <strong>تحذير:</strong> عملية التسجيل في eu.org يدوية ويستغرق الموافقة من أسبوعين إلى عدة أشهر. إذا كنت بحاجة للنطاق فورًا، استخدم النطاق الفرعي من Vercel.
+  </div>
+
+  <ol>
+    <li>انتقل إلى <span dir="ltr">nic.eu.org</span> وأنشئ حسابًا</li>
+    <li>اختر اسم النطاق المتاح (مثل <span dir="ltr">cloudstudio.eu.org</span>)</li>
+    <li>أضف عنوان خادم DNS الخاص بـ Vercel: <span dir="ltr">ns1.vercel-dns.com</span> و <span dir="ltr">ns2.vercel-dns.com</span></li>
+    <li>انتظر الموافقة (تكون يدوية من متطوعين)</li>
+    <li>بعد الموافقة، أضف النطاق في Vercel Dashboard</li>
+  </ol>
+
+  <div class="subsection-title">5.3 خيارات نطاق أخرى مجانية</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>المزود</th><th>النطاق</th><th>المميزات</th><th>العيوب</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Vercel</strong></td>
+          <td dir="ltr">.vercel.app</td>
+          <td>فوري، SSL تلقائي</td>
+          <td>نطاق فرعي فقط</td>
+        </tr>
+        <tr>
+          <td><strong>eu.org</strong></td>
+          <td dir="ltr">.eu.org</td>
+          <td>نطاق حقيقي مجاني</td>
+          <td>موافقة يدوية بطيئة</td>
+        </tr>
+        <tr>
+          <td><strong>GitHub Pages</strong></td>
+          <td dir="ltr">.github.io</td>
+          <td>فوري مع GitHub</td>
+          <td>صفحات ثابتة فقط</td>
+        </tr>
+        <tr>
+          <td><strong>Cloudflare Pages</strong></td>
+          <td dir="ltr">.pages.dev</td>
+          <td>سريع + CDN</td>
+          <td>لا يدعم COOP/COEP بسهولة</td>
+        </tr>
+        <tr>
+          <td><strong>Netlify</strong></td>
+          <td dir="ltr">.netlify.app</td>
+          <td>SSL + نشر تلقائي</td>
+          <td>مشابه لـ Vercel</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 6</span>
+  </div>
+</div>
+
+<!-- ===== صفحة التحقق والاختبار ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">التحقق والاختبار</div>
+  </div>
+
+  <div class="subsection-title">6.1 قائمة التحقق بعد النشر</div>
+
+  <p>بعد إكمال جميع الخطوات، تحقق من العناصر التالية:</p>
+
+  <div class="two-col" style="margin-top: 14px;">
+    <div class="card" style="border-color: var(--success);">
+      <div class="card-title" style="color: var(--success);">البنية التحتية</div>
+      <ul class="check-list" style="font-size: 9.5pt;">
+        <li>الموقع يفتح عبر HTTPS</li>
+        <li>رؤوس COOP/COEP تعمل</li>
+        <li>لا أخطاء في Console</li>
+        <li>الملفات الثابتة تُحمَّل</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color: var(--secondary);">
+      <div class="card-title" style="color: var(--secondary);">الوظائف</div>
+      <ul class="check-list" style="font-size: 9.5pt;">
+        <li>WebContainer يشتغل</li>
+        <li>npm install ينفذ بنجاح</li>
+        <li>npm run dev يشغل الخادم</li>
+        <li>المعاينة الحية تعمل</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color: var(--primary-light);">
+      <div class="card-title" style="color: var(--primary-light);">قاعدة البيانات</div>
+      <ul class="check-list" style="font-size: 9.5pt;">
+        <li>API routes تستجيب</li>
+        <li>إنشاء مشروع يعمل</li>
+        <li>حفظ الملفات يعمل</li>
+        <li>النسخ الاحتياطي يعمل</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color: var(--warning);">
+      <div class="card-title" style="color: var(--warning);">الواجهة</div>
+      <ul class="check-list" style="font-size: 9.5pt;">
+        <li>المحرر (Monaco) يعمل</li>
+        <li>الطرفية (xterm) تعمل</li>
+        <li>مستعرض الملفات يعمل</li>
+        <li>AI Chat يستجيب</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="subsection-title">6.2 اختبار رؤوس COOP/COEP</div>
+
+  <p>افتح المتصفح وانتقل إلى عنوان موقعك. افتح <strong>DevTools → Network</strong> وانقر على أي طلب. تحقق من وجود الرؤوس التالية في الاستجابة:</p>
+
+  <div class="code-block">cross-origin-opener-policy: same-origin
+cross-origin-embedder-policy: credentialless</div>
+
+  <div class="info-box success">
+    <strong>طريقة أسرع:</strong> افتح Console في المتصفح ونفّذ:
+    <span dir="ltr" style="display:block; font-family: monospace; margin-top: 6px; background: var(--code-bg); padding: 8px; border-radius: 6px;">
+      typeof SharedArrayBuffer === 'function'  // يجب أن يكون true
+    </span>
+  </div>
+
+  <div class="subsection-title">6.3 اختبار API Routes</div>
+
+  <div class="code-block">// اختبار قائمة المشاريع
+curl https://your-domain.vercel.app/api/projects
+
+// اختبار إنشاء مشروع جديد
+curl -X POST https://your-domain.vercel.app/api/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Project","userId":"test-user"}'</div>
+
+  <div class="subsection-title">6.4 حل المشاكل الشائعة</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>المشكلة</th><th>السبب</th><th>الحل</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color: var(--danger);">SharedArrayBuffer is not defined</td>
+          <td>رؤوس COOP/COEP مفقودة</td>
+          <td>تأكد من ملف vercel.json</td>
+        </tr>
+        <tr>
+          <td style="color: var(--danger);">WebContainer fails to boot</td>
+          <td>الإتصال ليس HTTPS</td>
+          <td>تأكد من SSL فعال</td>
+        </tr>
+        <tr>
+          <td style="color: var(--warning);">Database 503 error</td>
+          <td>متغيرات Supabase ناقصة</td>
+          <td>أضفها في Vercel + Redeploy</td>
+        </tr>
+        <tr>
+          <td style="color: var(--warning);">AI Chat لا يرد</td>
+          <td>SDK غير مهيأ خارج z.ai</td>
+          <td>يحتاج مفتاح API خارجي</td>
+        </tr>
+        <tr>
+          <td style="color: var(--warning);">CORS error</td>
+          <td>iframe المعاينة</td>
+          <td>طبيعي مع sandbox attribute</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 7</span>
+  </div>
+</div>
+
+<!-- ===== صفحة الملخص ===== -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">ملخص سريع + أوامر</div>
+  </div>
+
+  <div class="subsection-title">7.1 ملخص خطوات النشر</div>
+
+  <div class="step" style="border-color: var(--success);">
+    <div class="step-num" style="background: var(--success);">1</div>
+    <div class="step-content">
+      <strong>Supabase:</strong> أنشئ مشروعًا مجانيًا ← شغّل SQL لإنشاء الجداول ← انسخ URL والمفاتيح
+    </div>
+  </div>
+  <div class="step" style="border-color: var(--secondary);">
+    <div class="step-num" style="background: var(--secondary);">2</div>
+    <div class="step-content">
+      <strong>Vercel:</strong> سجّل الدخول بـ GitHub ← اختر المستودع ← Deploy ← أضف Environment Variables
+    </div>
+  </div>
+  <div class="step" style="border-color: var(--primary-light);">
+    <div class="step-num" style="background: var(--primary-light);">3</div>
+    <div class="step-content">
+      <strong>النطاق:</strong> استخدم .vercel.app فوريًا أو أطلب eu.org للحصول على نطاق حقيقي مجاني
+    </div>
+  </div>
+  <div class="step" style="border-color: var(--warning);">
+    <div class="step-num" style="background: var(--warning);">4</div>
+    <div class="step-content">
+      <strong>التحقق:</strong> افتح الموقع في Chrome ← اختبر SharedArrayBuffer ← اختبر API ← اختبر WebContainer
+    </div>
+  </div>
+
+  <div class="subsection-title">7.2 أوامر Git للتحديث</div>
+
+  <div class="code-block"># بعد أي تعديل على الكود
+git add -A
+git commit -m "وصف التعديل"
+git push origin main
+
+# Vercel سينشر تلقائيًا بعد كل push</div>
+
+  <div class="subsection-title">7.3 التكلفة الإجمالية</div>
+
+  <div class="info-box success" style="font-size: 10.5pt;">
+    <strong>التكلفة الإجمالية: 0 ر.س/شهر</strong>
+    <br><br>
+    جميع الخدمات المستخدمة مجانية بالكامل:
+    <br>• Supabase — 500MB PostgreSQL + مصادقة + تخزين
+    <br>• Vercel — استضافة + SSL + CDN + نطاق فرعي
+    <br>• GitHub — استضافة الكود + CI/CD
+    <br>• eu.org — نطاق مجاني (اختياري)
+  </div>
+
+  <div class="subsection-title">7.4 حدود الخدمات المجانية</div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>الخدمة</th><th>الحد</th><th>يكفي لـ</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Supabase DB</td>
+          <td>500 MB</td>
+          <td>آلاف المشاريع والملفات</td>
+        </tr>
+        <tr>
+          <td>Supabase Rows</td>
+          <td>50,000/شهر</td>
+          <td>استخدام شخصي كافٍ</td>
+        </tr>
+        <tr>
+          <td>Vercel Bandwidth</td>
+          <td>100 GB/شهر</td>
+          <td>عشرات آلاف الزيارات</td>
+        </tr>
+        <tr>
+          <td>Vercel Builds</td>
+          <td>6,000/شهر</td>
+          <td>200 بناء يوميًا</td>
+        </tr>
+        <tr>
+          <td>Vercel Functions</td>
+          <td>GB-Hours/شهر</td>
+          <td>آلاف الاستدعاءات</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="subsection-title">7.5 الترقية المستقبلية</div>
+
+  <p>عندما ينمو المشروع، يمكنك الترقية خطوة بخطوة:</p>
+
+  <ul>
+    <li><strong>مصادقة المستخدمين:</strong> تفعيل Supabase Auth (GitHub/Google login)</li>
+    <li><strong>نطاق مدفوع:</strong> شراء نطاق .com أو .dev (حوالي $10/سنة)</li>
+    <li><strong>Pro Plan:</strong> Vercel Pro ($20/شهر) لضمان الأداء</li>
+    <li><strong>Supabase Pro:</strong> ($25/شهر) لـ 8GB وقاعدة بيانات أكبر</li>
+    <li><strong>Custom CI/CD:</strong> GitHub Actions للبناء والاختبار</li>
+  </ul>
+
+  <div class="page-footer">
+    <span>Cloud-Native Studio — دليل النشر</span>
+    <span>صفحة 8</span>
+  </div>
+</div>
+
+</body>
+</html>
