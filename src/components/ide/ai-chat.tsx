@@ -1,7 +1,7 @@
 'use client';
 
 import { useIDEStore } from '@/store/ide-store';
-import { Send, X, Bot, User, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Trash2 } from 'lucide-react';
 import { useState, useRef, useEffect, FormEvent } from 'react';
 
 export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
@@ -12,7 +12,7 @@ export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+  }, [chatMessages, isTyping]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -35,7 +35,7 @@ export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
       setTimeout(() => {
         addChatMessage({
           role: 'assistant',
-          content: `شكرًا لسؤالك! أنا مساعدك الذكي في Cloud-Native Studio.\n\nحاليًا، تم عرض إجابة افتراضية. لتفعيل المساعد الذكي بالكامل، يمكن ربط واجهة AI API.\n\n💡 **نصائح سريعة:**\n- استخدم \`npm install\` لتثبيت الحزم\n- استخدم \`npm run dev\` لتشغيل المشروع\n- حرر الملفات مباشرة من المحرر`
+          content: `شكرًا لسؤالك! أنا مساعدك الذكي في Cloud-Native Studio.\n\nحاليًا، تم عرض إجابة افتراضية. لتفعيل المساعد الذكي بالكامل، يمكن ربط واجهة AI API.\n\n💡 نصائح سريعة:\n- استخدم npm install لتثبيت الحزم\n- استخدم npm run dev لتشغيل المشروع\n- حرر الملفات مباشرة من المحرر`
         });
       }, 1000);
     }
@@ -43,19 +43,36 @@ export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
     setIsTyping(false);
   };
 
-  // Mobile: always open, full screen, no floating button
+  // Mobile: always open, full screen
   if (isMobile) {
     return (
       <div className="h-full flex flex-col bg-[#1e1e1e]" dir="rtl">
         {/* Mobile Chat Header */}
-        <div className="flex items-center gap-2 px-3 py-3 border-b border-border/50 bg-[#252526]">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+        <div className="flex items-center justify-between px-3 py-3 border-b border-border/50 bg-[#252526]">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-600 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">المساعد الذكي</h3>
+              <p className="text-[10px] text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">المساعد الذكي</h3>
-            <p className="text-[10px] text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
-          </div>
+          <button
+            onClick={() => {
+              useIDEStore.getState().addChatMessage = useIDEStore.getState().addChatMessage;
+              // Clear chat by resetting to welcome message only
+              useIDEStore.setState({
+                chatMessages: [
+                  { role: 'assistant', content: 'مرحبًا! أنا مساعدك الذكي في Cloud-Native Studio. كيف يمكنني مساعدتك اليوم؟ 🚀' }
+                ]
+              });
+            }}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            title="مسح المحادثة"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Messages */}
@@ -119,21 +136,9 @@ export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
     );
   }
 
-  // Desktop: sidebar behavior
-  if (!isAIChatOpen) {
-    return (
-      <button
-        onClick={toggleAIChat}
-        className="fixed bottom-4 left-4 z-50 p-3 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
-        title="فتح المساعد الذكي"
-      >
-        <Sparkles className="w-5 h-5" />
-      </button>
-    );
-  }
-
+  // Desktop: always renders chat content (open/close handled by parent layout)
   return (
-    <div className="h-full flex flex-col bg-[#1e1e1e] border-l border-border/50" dir="rtl">
+    <div className="h-full flex flex-col bg-[#1e1e1e]" dir="rtl">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border/50 bg-[#252526]">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-violet-600 to-cyan-600 flex items-center justify-center">
@@ -144,8 +149,16 @@ export function AIChat({ isMobile = false }: { isMobile?: boolean }) {
             <p className="text-[10px] text-muted-foreground">مدعوم بالذكاء الاصطناعي</p>
           </div>
         </div>
-        <button onClick={toggleAIChat} className="p-1 rounded hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors">
-          <X className="w-4 h-4" />
+        <button
+          onClick={() => useIDEStore.setState({
+            chatMessages: [
+              { role: 'assistant', content: 'مرحبًا! أنا مساعدك الذكي في Cloud-Native Studio. كيف يمكنني مساعدتك اليوم؟ 🚀' }
+            ]
+          })}
+          className="p-1 rounded hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors"
+          title="مسح المحادثة"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
 

@@ -115,6 +115,10 @@ The project uses Vite as the development server.
 
 // Track whether server-ready listener has been registered (prevent accumulation)
 let serverReadyRegistered = false;
+let serverReadyCleanup: (() => void) | null = null;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type WebContainerInstance = any;
 
 export function useWebContainer() {
   const hasBootedRef = useRef(false);
@@ -132,7 +136,6 @@ export function useWebContainer() {
   } = useIDEStore();
 
   const bootWebContainer = useCallback(async () => {
-    // Prevent double-boot
     if (hasBootedRef.current || isBootingRef.current || webcontainerInstance) return;
     hasBootedRef.current = true;
     isBootingRef.current = true;
@@ -144,23 +147,26 @@ export function useWebContainer() {
       const { WebContainer } = await import('@webcontainer/api');
       addTerminalOutput('📦 تم تحميل WebContainer API');
 
-      const instance = await WebContainer.boot();
+      const instance: WebContainerInstance = await WebContainer.boot();
       setWebcontainerInstance(instance);
       addTerminalOutput('✅ تم تشغيل بيئة WebContainer بنجاح!');
 
-      // Register server-ready listener ONCE per instance
+      // Register server-ready listener ONCE per instance lifecycle
       if (!serverReadyRegistered) {
         serverReadyRegistered = true;
-        instance.on('server-ready', (port: number, url: string) => {
+        // The on method returns an unsubscribe function
+        if (serverReadyCleanup) serverReadyCleanup();
+        serverReadyCleanup = instance.on('server-ready', (port: number, url: string) => {
           setPreviewUrl(url);
           addTerminalOutput(`🌐 خادم التطوير جاهز على المنفذ ${port}`);
           addTerminalOutput(`🔗 رابط المعاينة: ${url}`);
         });
       }
 
-      // Write all sample files
+      // Write all sample files via instance.fs
+      const fs = instance.fs;
       for (const [path, content] of Object.entries(SAMPLE_FILES)) {
-        await instance.writeFile(path, content);
+        await fs.writeFile(path, content);
         setFileContent(path, content);
       }
 
@@ -241,7 +247,7 @@ export function useWebContainer() {
   const writeFile = useCallback(async (path: string, content: string) => {
     const instance = useIDEStore.getState().webcontainerInstance;
     if (!instance) return;
-    await instance.writeFile(path, content);
+    await instance.fs.writeFile(path, content);
     setFileContent(path, content);
   }, [setFileContent]);
 

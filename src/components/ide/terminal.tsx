@@ -46,7 +46,7 @@ export function TerminalPanel() {
       cursorBlink: true,
       cursorStyle: 'block',
       scrollback: 5000,
-      scrollbackSensitivity: 60,
+      scrollSensitivity: 60,
       allowProposedApi: true,
     });
 
@@ -100,10 +100,10 @@ export function TerminalPanel() {
       }
     };
 
-    xterm.onData(handleData);
+    const disposable = xterm.onData(handleData);
 
     return () => {
-      xterm.offData(handleData);
+      disposable.dispose();
     };
   }, [isWebContainerReady]);
 

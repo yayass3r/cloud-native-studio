@@ -2,17 +2,22 @@
 
 import { useIDEStore } from '@/store/ide-store';
 import { Globe, RefreshCw, ExternalLink, Monitor, Smartphone, Tablet } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export function LivePreview({ isMobile = false }: { isMobile?: boolean }) {
   const { previewUrl, isWebContainerReady } = useIDEStore();
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const handleRefresh = () => {
+    if (!iframeRef.current) return;
     setIsRefreshing(true);
-    const iframe = document.querySelector('iframe');
-    if (iframe) iframe.src = iframe.src;
+    const currentSrc = iframeRef.current.src;
+    iframeRef.current.src = ''; // Force reload
+    requestAnimationFrame(() => {
+      if (iframeRef.current) iframeRef.current.src = currentSrc;
+    });
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
@@ -36,7 +41,6 @@ export function LivePreview({ isMobile = false }: { isMobile?: boolean }) {
           </span>
         </div>
         <div className="flex items-center gap-1">
-          {/* View mode buttons only on desktop */}
           {!isMobile && (
             <>
               <button onClick={() => setViewMode('desktop')} className={`p-1 rounded transition-colors ${viewMode === 'desktop' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'}`} title="سطح المكتب">
@@ -88,6 +92,7 @@ export function LivePreview({ isMobile = false }: { isMobile?: boolean }) {
         ) : (
           <div className={`h-full w-full ${getPreviewWidth()} transition-all duration-300 ${isMobile ? '' : 'mx-auto'}`}>
             <iframe
+              ref={iframeRef}
               src={previewUrl}
               className="h-full w-full rounded border border-border/30 bg-white"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups"

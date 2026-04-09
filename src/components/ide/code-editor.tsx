@@ -30,31 +30,38 @@ function getLanguage(filePath: string | null): string {
 }
 
 export function CodeEditor({ isMobile = false }: { isMobile?: boolean }) {
-  const { activeFilePath, fileContents, setFileContent } = useIDEStore();
+  const activeFilePath = useIDEStore((s) => s.activeFilePath);
+  const fileContents = useIDEStore((s) => s.fileContents);
+  const setFileContent = useIDEStore((s) => s.setFileContent);
   const currentContent = activeFilePath ? fileContents[activeFilePath] || '' : '';
   const language = getLanguage(activeFilePath);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeFileRef = useRef(activeFilePath);
 
-  // Debounced save to WebContainer (avoid excessive writes)
+  // Keep ref in sync to avoid stale closure in debounce
+  activeFileRef.current = activeFilePath;
+
   const handleEditorChange = useCallback((value: string | undefined) => {
-    if (!activeFilePath || value === undefined) return;
+    const filePath = activeFileRef.current;
+    if (!filePath || value === undefined) return;
 
     // Update store immediately for reactive UI
-    setFileContent(activeFilePath, value);
+    setFileContent(filePath, value);
 
     // Debounced write to WebContainer filesystem
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
       const instance = useIDEStore.getState().webcontainerInstance;
-      if (instance) {
+      const savePath = activeFileRef.current;
+      if (instance && savePath) {
         try {
-          await instance.writeFile(activeFilePath, value);
+          await instance.writeFile(savePath, value);
         } catch (err) {
           console.error('Failed to save file to WebContainer:', err);
         }
       }
     }, 500);
-  }, [activeFilePath, setFileContent]);
+  }, [setFileContent]);
 
   if (!activeFilePath) {
     return (
@@ -63,7 +70,7 @@ export function CodeEditor({ isMobile = false }: { isMobile?: boolean }) {
           <FileIcon />
           <p className="text-base font-medium mt-4">{isMobile ? 'اختر ملفًا' : 'اختر ملفًا للتعديل'}</p>
           <p className="text-sm mt-1 text-muted-foreground/70">
-            {isMobile ? 'انتقل إلى تبويب "الملفات" واختر ملفًا' : 'اختر ملفًا من مستعرض الملفات على اليسار'}
+            {isMobile ? 'انتقل إلى تبويب "الملفات" واختر ملفًا' : 'اختر ملفًا من مستعرض الملفات على اليمين'}
           </p>
         </div>
       </div>
