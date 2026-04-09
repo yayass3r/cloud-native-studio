@@ -78,3 +78,52 @@ Work Log:
 Stage Summary:
 - PromoBox is accessible from both desktop and mobile via header info button
 - 0 lint errors, dev server compiles successfully
+
+---
+Task ID: 4
+Agent: main
+Task: Comprehensive code review and bug fixes for Cloud-Native Studio
+
+Work Log:
+- Read and analyzed all project files (13 core files)
+- Identified 7 critical bugs and architectural issues
+- Fixed all issues across 5 files
+
+### Bugs Fixed:
+
+**🔴 Bug 1: WebContainer double-boot (CRITICAL)**
+- Problem: `useWebContainer()` was called in both `ide-layout.tsx` and `command-bar.tsx`, causing two independent WebContainer instances to be created
+- Fix: Moved WebContainer instance to Zustand store (`webcontainerInstance`, `runningProcess`), added `hasBootedRef` guard to prevent double-boot, removed `useWebContainer()` call from `CommandBar`
+
+**🔴 Bug 2: Terminal output duplication (CRITICAL)**
+- Problem: `terminal.tsx` wrote `terminalOutput.join('\n')` on EVERY state change, causing xterm to re-write all history each time a new line was added
+- Fix: Added `lastOutputLengthRef` to track how many lines have already been written, only writes new lines using `terminalOutput.slice(lastOutputLengthRef.current)`
+
+**🔴 Bug 3: Terminal stdin not connected (CRITICAL)**
+- Problem: xterm's keyboard input (`onData`) was never connected to the running process's stdin, making the terminal read-only
+- Fix: Added `useEffect` in terminal.tsx that connects xterm `onData` to `runningProcess.input.getWriter().write()`
+
+**🔴 Bug 4: Editor changes not saved to WebContainer (CRITICAL)**
+- Problem: Monaco Editor read from `fileContents` but had no `onChange` handler, so edits were lost
+- Fix: Added `onChange` callback to Monaco with debounced (500ms) `instance.writeFile()` call to WebContainer filesystem, plus immediate store update
+
+**🔴 Bug 5: server-ready event race condition (CRITICAL)**
+- Problem: `server-ready` listener was registered AFTER `process.exit` awaited, but `npm run dev` is long-running so `process.exit` never resolves while server is running
+- Fix: Moved `server-ready` listener registration to BEFORE `instance.spawn()`, and made dev commands non-blocking (don't await `process.exit`)
+
+**🟡 Bug 6: Memory leak in terminal output**
+- Problem: `terminalOutput` array grew unbounded as more commands were run
+- Fix: Added cap at 2000 lines, auto-trims to 1500 when exceeded
+
+**🟡 Bug 7: Unused import**
+- Problem: `MessageSquareCode` imported but not used in `promo-box.tsx`
+- Fix: Removed unused import
+
+Stage Summary:
+- All 7 bugs fixed across 5 files: ide-store.ts, use-webcontainer.ts, terminal.tsx, code-editor.tsx, command-bar.tsx, promo-box.tsx
+- Build passes with 0 errors
+- WebContainer now boots exactly once and shares instance across all components
+- Terminal is now interactive (stdin connected)
+- Editor saves changes to WebContainer filesystem
+- Dev server URL is properly captured
+- Terminal output properly managed without duplication

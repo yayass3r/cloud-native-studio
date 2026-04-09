@@ -9,8 +9,10 @@ import '@xterm/xterm/css/xterm.css';
 export function TerminalPanel() {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<XTerm | null>(null);
-  const { terminalOutput } = useIDEStore();
+  const lastOutputLengthRef = useRef(0);
+  const { terminalOutput, isWebContainerReady, runningProcess } = useIDEStore();
 
+  // Create xterm instance once
   useEffect(() => {
     if (!terminalRef.current || xtermRef.current) return;
 
@@ -67,14 +69,53 @@ export function TerminalPanel() {
       window.removeEventListener('resize', handleResize);
       xterm.dispose();
       xtermRef.current = null;
+      lastOutputLengthRef.current = 0;
     };
   }, []);
 
+  // Write ONLY new output lines to xterm (fixes duplication bug)
   useEffect(() => {
-    if (xtermRef.current) {
-      xtermRef.current.write(terminalOutput.join('\n') + '\n');
+    if (!xtermRef.current) return;
+
+    const newLines = terminalOutput.slice(lastOutputLengthRef.current);
+    if (newLines.length > 0) {
+      xtermRef.current.write(newLines.join('\n') + '\n');
+      lastOutputLengthRef.current = terminalOutput.length;
     }
   }, [terminalOutput]);
+
+  // Connect xterm keyboard input to running process stdin
+  useEffect(() => {
+    const xterm = xtermRef.current;
+    if (!xterm) return;
+
+    const handleData = (data: string) => {
+      if (!isWebContainerReady) return;
+
+      const proc = useIDEStore.getState().runningProcess;
+      if (proc && proc.input) {
+        const writer = proc.input.getWriter();
+        writer.write(data);
+        writer.releaseLock();
+      }
+    };
+
+    xterm.onData(handleData);
+
+    return () => {
+      xterm.offData(handleData);
+    };
+  }, [isWebContainerReady]);
+
+  // Reset output tracker when terminal is cleared
+  useEffect(() => {
+    if (terminalOutput.length === 0 && lastOutputLengthRef.current > 0) {
+      lastOutputLengthRef.current = 0;
+      if (xtermRef.current) {
+        xtermRef.current.clear();
+      }
+    }
+  }, [terminalOutput.length]);
 
   return (
     <div className="h-full w-full bg-[#0d1117]">

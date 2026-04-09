@@ -1,14 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useIDEStore } from '@/store/ide-store';
-import { useWebContainer } from '@/hooks/use-webcontainer';
 import { Terminal, Play, Trash2, Sparkles } from 'lucide-react';
 
 export function CommandBar({ isMobile = false }: { isMobile?: boolean }) {
   const [commandInput, setCommandInput] = useState('');
   const { clearTerminal, isWebContainerReady, isBooting, mobileActiveTab, setMobileActiveTab } = useIDEStore();
-  const { runCommand } = useWebContainer();
+
+  // Run command using the shared WebContainer instance from store
+  const runCommand = useCallback(async (command: string) => {
+    const instance = useIDEStore.getState().webcontainerInstance;
+    if (!instance) {
+      useIDEStore.getState().addTerminalOutput('❌ بيئة التطوير غير جاهزة بعد');
+      return;
+    }
+
+    useIDEStore.getState().addTerminalOutput(`$ ${command}`);
+
+    // Register server-ready BEFORE spawning for dev commands
+    if (command.includes('dev')) {
+      instance.on('server-ready', (port: number, url: string) => {
+        useIDEStore.getState().setPreviewUrl(url);
+        useIDEStore.getState().addTerminalOutput(`🌐 خادم التطوير جاهز على المنفذ ${port}`);
+        useIDEStore.getState().addTerminalOutput(`🔗 رابط المعاينة: ${url}`);
+      });
+    }
+
+    const [cmd, ...args] = command.split(' ');
+    const process = await instance.spawn(cmd, args);
+    useIDEStore.getState().setRunningProcess(process);
+
+    // Connect stdin for interactive commands
+    const xtermElement = document.querySelector('.xterm') as any;
+    // Process output will be piped via the store's addTerminalOutput
+
+    process.output.pipeTo(new WritableStream({
+      write(data) {
+        useIDEStore.getState().addTerminalOutput(data);
+      }
+    }));
+
+    // For long-running processes, don't await exit
+    if (command.includes('dev') || command.includes('start')) {
+      process.exit.then((exitCode: number) => {
+        useIDEStore.getState().setRunningProcess(null);
+        if (exitCode !== 0) {
+          useIDEStore.getState().addTerminalOutput(`⚠️ انتهت العملية (exit code: ${exitCode})`);
+        }
+      });
+    } else {
+      const exitCode = await process.exit;
+      useIDEStore.getState().setRunningProcess(null);
+
+      if (exitCode === 0) {
+        useIDEStore.getState().addTerminalOutput(`✅ تم تنفيذ الأمر بنجاح (exit code: 0)`);
+      } else {
+        useIDEStore.getState().addTerminalOutput(`❌ فشل تنفيذ الأمر (exit code: ${exitCode})`);
+      }
+    }
+  }, []);
 
   const handleCommandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

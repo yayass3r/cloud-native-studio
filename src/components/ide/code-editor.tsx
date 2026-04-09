@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useIDEStore } from '@/store/ide-store';
+import { useRef, useCallback } from 'react';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -29,9 +30,31 @@ function getLanguage(filePath: string | null): string {
 }
 
 export function CodeEditor({ isMobile = false }: { isMobile?: boolean }) {
-  const { activeFilePath, fileContents } = useIDEStore();
+  const { activeFilePath, fileContents, setFileContent } = useIDEStore();
   const currentContent = activeFilePath ? fileContents[activeFilePath] || '' : '';
   const language = getLanguage(activeFilePath);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced save to WebContainer (avoid excessive writes)
+  const handleEditorChange = useCallback((value: string | undefined) => {
+    if (!activeFilePath || value === undefined) return;
+
+    // Update store immediately for reactive UI
+    setFileContent(activeFilePath, value);
+
+    // Debounced write to WebContainer filesystem
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const instance = useIDEStore.getState().webcontainerInstance;
+      if (instance) {
+        try {
+          await instance.writeFile(activeFilePath, value);
+        } catch (err) {
+          console.error('Failed to save file to WebContainer:', err);
+        }
+      }
+    }, 500);
+  }, [activeFilePath, setFileContent]);
 
   if (!activeFilePath) {
     return (
@@ -55,6 +78,7 @@ export function CodeEditor({ isMobile = false }: { isMobile?: boolean }) {
         theme="vs-dark"
         value={currentContent}
         path={activeFilePath}
+        onChange={handleEditorChange}
         options={{
           minimap: { enabled: !isMobile },
           fontSize: 14,

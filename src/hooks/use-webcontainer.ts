@@ -102,6 +102,7 @@ This is a sample project running inside WebContainers.
 ## Getting Started
 
 The project uses Vite as the development server.
+- Run \`npm install\` to install dependencies
 - Run \`npm run dev\` to start the dev server
 - The preview will appear in the Live Preview panel
 
@@ -113,7 +114,7 @@ The project uses Vite as the development server.
 };
 
 export function useWebContainer() {
-  const webcontainerInstanceRef = useRef<any>(null);
+  const hasBootedRef = useRef(false);
   const {
     setWebContainerReady,
     setBooting,
@@ -122,9 +123,17 @@ export function useWebContainer() {
     setFiles,
     setFileContent,
     isWebContainerReady,
+    webcontainerInstance,
+    setWebcontainerInstance,
+    setRunningProcess,
+    runningProcess,
   } = useIDEStore();
 
   const bootWebContainer = useCallback(async () => {
+    // Prevent double-boot
+    if (hasBootedRef.current || webcontainerInstance) return;
+    hasBootedRef.current = true;
+
     setBooting(true);
     addTerminalOutput('⏳ جاري تحميل بيئة التطوير...');
 
@@ -135,12 +144,13 @@ export function useWebContainer() {
       addTerminalOutput('📦 تم تحميل WebContainer API');
 
       // Boot the WebContainer
-      webcontainerInstanceRef.current = await WebContainer.boot();
+      const instance = await WebContainer.boot();
+      setWebcontainerInstance(instance);
       addTerminalOutput('✅ تم تشغيل بيئة WebContainer بنجاح!');
 
       // Write all sample files
       for (const [path, content] of Object.entries(SAMPLE_FILES)) {
-        await webcontainerInstanceRef.current.writeFile(path, content);
+        await instance.writeFile(path, content);
         setFileContent(path, content);
       }
 
@@ -163,16 +173,20 @@ export function useWebContainer() {
       setBooting(false);
 
       // Auto-run npm install
-      await runCommand('npm install');
+      await runCommandRef.current('npm install');
 
     } catch (error: any) {
       addTerminalOutput(`❌ خطأ في تشغيل WebContainer: ${error.message}`);
       setBooting(false);
+      hasBootedRef.current = false;
     }
-  }, []);
+  }, [webcontainerInstance]);
 
-  const runCommand = useCallback(async (command: string) => {
-    const instance = webcontainerInstanceRef.current;
+  // Use ref for runCommand to avoid stale closure issues
+  const runCommandRef = useRef<any>(null);
+
+  runCommandRef.current = async (command: string) => {
+    const instance = useIDEStore.getState().webcontainerInstance;
     if (!instance) {
       addTerminalOutput('❌ بيئة التطوير غير جاهزة بعد');
       return;
@@ -180,36 +194,67 @@ export function useWebContainer() {
 
     addTerminalOutput(`$ ${command}`);
 
-    const process = await instance.spawn(command.split(' ')[0], command.split(' ').slice(1));
+    // Register server-ready BEFORE spawning the process
+    if (command.includes('dev')) {
+      instance.on('server-ready', (port: number, url: string) => {
+        setPreviewUrl(url);
+        addTerminalOutput(`🌐 خادم التطوير جاهز على المنفذ ${port}`);
+        addTerminalOutput(`🔗 رابط المعاينة: ${url}`);
+      });
+    }
 
+    const [cmd, ...args] = command.split(' ');
+    const process = await instance.spawn(cmd, args);
+    setRunningProcess(process);
+
+    // Pipe stdout to terminal
     process.output.pipeTo(new WritableStream({
       write(data) {
         addTerminalOutput(data);
       }
     }));
 
-    const exitCode = await process.exit;
+    // Pipe stdin from terminal (via onTerminalInput callback)
+    const currentProcess = process;
 
-    if (exitCode === 0) {
-      addTerminalOutput(`✅ تم تنفيذ الأمر بنجاح (exit code: 0)`);
-
-      // If running dev server, capture the URL
-      if (command.includes('dev')) {
-        instance.on('server-ready', (port: number, url: string) => {
-          setPreviewUrl(url);
-          addTerminalOutput(`🌐 خادم التطوير جاهز على المنفذ ${port}`);
-          addTerminalOutput(`🔗 رابط المعاينة: ${url}`);
-        });
-      }
+    // For long-running processes (dev server), don't await exit
+    if (command.includes('dev') || command.includes('start')) {
+      process.exit.then((exitCode: number) => {
+        setRunningProcess(null);
+        if (exitCode !== 0) {
+          addTerminalOutput(`⚠️ انتهت العملية (exit code: ${exitCode})`);
+        }
+      });
     } else {
-      addTerminalOutput(`❌ فشل تنفيذ الأمر (exit code: ${exitCode})`);
+      const exitCode = await process.exit;
+      setRunningProcess(null);
+
+      if (exitCode === 0) {
+        addTerminalOutput(`✅ تم تنفيذ الأمر بنجاح (exit code: 0)`);
+      } else {
+        addTerminalOutput(`❌ فشل تنفيذ الأمر (exit code: ${exitCode})`);
+      }
     }
 
     return process;
-  }, [isWebContainerReady]);
+  };
+
+  const runCommand = useCallback(async (command: string) => {
+    return runCommandRef.current(command);
+  }, []);
+
+  // Expose a function to write to the running process stdin
+  const writeToStdin = useCallback((data: string) => {
+    const proc = useIDEStore.getState().runningProcess;
+    if (proc && proc.input) {
+      const writer = proc.input.getWriter();
+      writer.write(data);
+      writer.releaseLock();
+    }
+  }, []);
 
   const writeFile = useCallback(async (path: string, content: string) => {
-    const instance = webcontainerInstanceRef.current;
+    const instance = useIDEStore.getState().webcontainerInstance;
     if (!instance) return;
     await instance.writeFile(path, content);
     setFileContent(path, content);
@@ -218,13 +263,14 @@ export function useWebContainer() {
   useEffect(() => {
     // Auto-boot on mount
     bootWebContainer();
-  }, [bootWebContainer]);
+  }, []);
 
   return {
     isWebContainerReady,
     bootWebContainer,
     runCommand,
     writeFile,
-    webcontainerInstance: webcontainerInstanceRef,
+    writeToStdin,
+    webcontainerInstance,
   };
 }

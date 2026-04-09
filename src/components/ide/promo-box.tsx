@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, Sparkles, Cpu, Globe, MessageSquareCode, Layout, Layers } from 'lucide-react';
+import { Copy, Check, Sparkles, Cpu, Globe, Layout, Layers } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
